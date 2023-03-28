@@ -31,7 +31,8 @@ int evtloop_post(void *event)
 
 int evtloop_post_defer(void *event, uint32_t msec)
 {
-	return ao_post_defer(&evtloop, (struct ao_event * const)event, msec);
+	return ao_post_defer_if_unique(&evtloop,
+			(struct ao_event * const)event, msec);
 }
 
 void evtloop_init(int priority, size_t stack_size_bytes)

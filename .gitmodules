@@ -16,3 +16,9 @@
 [submodule "external/bq25180"]
 	path = external/bq25180
 	url = https://github.com/libmcu/bq25180.git
+[submodule "external/lvgl"]
+	path = external/lvgl
+	url = https://github.com/lvgl/lvgl.git
+[submodule "external/jsmn"]
+	path = external/jsmn
+	url = https://github.com/libmcu/jsmn.git

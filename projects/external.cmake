@@ -12,3 +12,5 @@ target_compile_definitions(libmcu PUBLIC
 	_POSIX_THREADS
 	_POSIX_C_SOURCE=200809L
 )
+
+list(APPEND APP_INCS ${CMAKE_SOURCE_DIR}/external/jsmn)

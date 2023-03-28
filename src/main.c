@@ -17,8 +17,10 @@
 #include "userbutton.h"
 #include "battery.h"
 #include "selftest.h"
+#include "gui.h"
+#include "collector.h"
 
-#define EVTLOOP_STACK_SIZE_BYTES	4096U
+#define EVTLOOP_STACK_SIZE_BYTES	8192U
 #define EVTLOOP_PRIORITY		1U
 
 #define CLI_MAX_HISTORY			10U
@@ -30,6 +32,8 @@
 static void process_led(void *ctx);
 static void process_button(void *ctx);
 static void process_battery(void *ctx);
+static void process_gui(void *ctx);
+static void process_collector(void *ctx);
 
 static evtloop_event_t led_event = {
 	.handler = process_led,
@@ -41,6 +45,14 @@ static evtloop_event_t button_event = {
 
 static evtloop_event_t battery_event = {
 	.handler = process_battery,
+};
+
+static evtloop_event_t gui_event = {
+	.handler = process_gui,
+};
+
+static evtloop_event_t collector_event = {
+	.handler = process_collector,
 };
 
 static void on_userbutton_state_change(void)
@@ -72,6 +84,26 @@ static void process_led(void *ctx)
 	unused(ctx);
 	uint32_t msec = ledind_step();
 	evtloop_post_defer(&led_event, msec);
+}
+
+static void process_gui(void *ctx)
+{
+	unused(ctx);
+	gui_step(0);
+	evtloop_post_defer(&gui_event, GUI_UPDATE_INTERVAL_MS);
+}
+
+static void process_collector(void *ctx)
+{
+	struct deskpal deskpal = { 0, };
+	uint32_t interval_ms = COLLECTOR_RETRY_INTERVAL_MS;
+
+	if (collector_aggregate(&deskpal) == COLLECTOR_SUCCESS) {
+		gui_step(&deskpal);
+		interval_ms = COLLECTOR_SCAN_INTERVAL_MS;
+	}
+
+	evtloop_post_defer(&collector_event, interval_ms);
 }
 
 static size_t logging_stdout_writer(const void *data, size_t size)
@@ -124,6 +156,19 @@ static void run_selftest(void)
 			led_blink_interval - LED_BLINK_ON_TIME_MS);
 }
 
+static void on_userbutton_event(enum button_event event,
+		const struct button_data *info, void *ctx)
+{
+	unused(ctx);
+	switch (event) {
+	case BUTTON_EVT_CLICK:
+		evtloop_post(&collector_event);
+		break;
+	default:
+		break;
+	}
+}
+
 int main(void)
 {
 	board_init(); /* should be called very first. */
@@ -136,13 +181,17 @@ int main(void)
 	battery_init(battery_monitor_init(on_battery_status_change));
 	userbutton_init(userbutton_gpio_init(on_userbutton_state_change));
 	ledind_init(ledind_gpio_create());
+	gui_init();
 
 	info("[%s] %s %s", board_get_reboot_reason_string(),
 			board_get_serial_number_string(),
 			board_get_version_string());
 
+	userbutton_set_handler(on_userbutton_event, 0);
 	ledind_enable();
 	evtloop_post(&led_event);
+	evtloop_post(&gui_event);
+	evtloop_post(&collector_event);
 	run_selftest();
 
 	shell_start();

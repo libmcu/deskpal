@@ -4,7 +4,7 @@
 include($ENV{IDF_PATH}/tools/cmake/idf.cmake)
 
 AUX_SOURCE_DIRECTORY(${CMAKE_CURRENT_LIST_DIR} PORT_SRCS)
-set(ESP_COMPONENTS freertos esptool_py esp-tls bt)
+set(ESP_COMPONENTS freertos esptool_py esp-tls bt esp_http_client esp_https_ota)
 
 if ($ENV{IDF_VERSION} VERSION_GREATER_EQUAL "5.0.0")
 	list(APPEND ESP_COMPONENTS esp_adc)
@@ -81,6 +81,11 @@ target_include_directories(${PROJECT_EXECUTABLE}
 		${APP_INCS}
 )
 
+set(LVGL_ROOT_DIR ${CMAKE_SOURCE_DIR}/external/lvgl)
+include(${LVGL_ROOT_DIR}/env_support/cmake/custom.cmake)
+target_compile_definitions(lvgl PRIVATE LV_CONF_INCLUDE_SIMPLE)
+target_include_directories(lvgl PUBLIC ${PROJECT_SOURCE_DIR}/include)
+
 # Link the static libraries to the executable
 target_link_libraries(${PROJECT_EXECUTABLE}
 	idf::freertos
@@ -88,6 +93,8 @@ target_link_libraries(${PROJECT_EXECUTABLE}
 	idf::nvs_flash
 	idf::driver
 	idf::pthread
+	idf::esp_http_client
+	idf::esp_https_ota
 
 	libmcu
 	pble
@@ -95,6 +102,7 @@ target_link_libraries(${PROJECT_EXECUTABLE}
 	pl4
 	pmqtt
 	bq25180
+	lvgl
 
 	-Wl,--cref
 	-Wl,--Map=\"${mapfile}\"
