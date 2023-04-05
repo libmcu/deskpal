@@ -16,9 +16,8 @@ lv_obj_t *ui_footer;
 lv_obj_t *ui_Label1;
 lv_obj_t *ui_header;
 lv_obj_t *ui_exchangerate1;
-lv_obj_t *ui_won1;
-lv_obj_t *ui_dollar1;
-lv_obj_t *ui_Label2;
+lv_obj_t *ui_wondollar;
+lv_obj_t *ui_exchangeRate;
 lv_obj_t *ui_battery;
 lv_obj_t *ui_gauge;
 lv_obj_t *ui_Bar2;
@@ -33,6 +32,7 @@ lv_obj_t *ui_Bar2;
 ///////////////////// FUNCTIONS ////////////////////
 
 ///////////////////// SCREENS ////////////////////
+
 void ui_update_screen(int aqi, int exchange_rate, int battery_pct, const char *date)
 {
 	const lv_img_dsc_t *imgs[] = {
@@ -102,38 +102,28 @@ lv_obj_clear_flag( ui_header, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
 ui_exchangerate1 = lv_obj_create(ui_header);
 lv_obj_set_height( ui_exchangerate1, 28);
-lv_obj_set_width( ui_exchangerate1, lv_pct(60));
+lv_obj_set_width( ui_exchangerate1, lv_pct(47));
 lv_obj_set_x( ui_exchangerate1, -13 );
 lv_obj_set_y( ui_exchangerate1, 0 );
 lv_obj_set_align( ui_exchangerate1, LV_ALIGN_LEFT_MID );
 lv_obj_clear_flag( ui_exchangerate1, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
-ui_won1 = lv_img_create(ui_exchangerate1);
-lv_img_set_src(ui_won1, &ui_img_won_png);
-lv_obj_set_width( ui_won1, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_won1, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_x( ui_won1, -10 );
-lv_obj_set_y( ui_won1, 0 );
-lv_obj_set_align( ui_won1, LV_ALIGN_LEFT_MID );
-lv_obj_add_flag( ui_won1, LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
-lv_obj_clear_flag( ui_won1, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+ui_wondollar = lv_img_create(ui_exchangerate1);
+lv_img_set_src(ui_wondollar, &ui_img_dollar_png);
+lv_obj_set_width( ui_wondollar, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_wondollar, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_wondollar, -10 );
+lv_obj_set_y( ui_wondollar, 0 );
+lv_obj_set_align( ui_wondollar, LV_ALIGN_LEFT_MID );
+lv_obj_add_flag( ui_wondollar, LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
+lv_obj_clear_flag( ui_wondollar, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
-ui_dollar1 = lv_img_create(ui_exchangerate1);
-lv_img_set_src(ui_dollar1, &ui_img_dollar_png);
-lv_obj_set_width( ui_dollar1, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_dollar1, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_x( ui_dollar1, 11 );
-lv_obj_set_y( ui_dollar1, 0 );
-lv_obj_set_align( ui_dollar1, LV_ALIGN_LEFT_MID );
-lv_obj_add_flag( ui_dollar1, LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
-lv_obj_clear_flag( ui_dollar1, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-
-ui_Label2 = lv_label_create(ui_exchangerate1);
-lv_obj_set_width( ui_Label2, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_Label2, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_Label2, LV_ALIGN_RIGHT_MID );
+ui_exchangeRate = lv_label_create(ui_exchangerate1);
+lv_obj_set_width( ui_exchangeRate, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_exchangeRate, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_exchangeRate, LV_ALIGN_RIGHT_MID );
 snprintf(buf, sizeof(buf),  "%d", exchange_rate);
-lv_label_set_text(ui_Label2, buf);
+lv_label_set_text(ui_exchangeRate, buf);
 
 ui_battery = lv_obj_create(ui_header);
 lv_obj_set_height( ui_battery, 25);

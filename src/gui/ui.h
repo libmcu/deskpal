@@ -20,8 +20,7 @@ extern lv_obj_t *ui_footer;
 extern lv_obj_t *ui_Label1;
 extern lv_obj_t *ui_header;
 extern lv_obj_t *ui_exchangerate1;
-extern lv_obj_t *ui_won1;
-extern lv_obj_t *ui_dollar1;
+extern lv_obj_t *ui_wondollar;
 extern lv_obj_t *ui_Label2;
 extern lv_obj_t *ui_battery;
 extern lv_obj_t *ui_gauge;
@@ -36,7 +35,6 @@ LV_IMG_DECLARE( ui_img_verybad_png);   // assets/good.png
 LV_IMG_DECLARE( ui_img_dead_png);   // assets/good.png
 LV_IMG_DECLARE( ui_img_nobattery_png);   // assets/good.png
 LV_IMG_DECLARE( ui_img_nowifi_png);   // assets/good.png
-LV_IMG_DECLARE( ui_img_won_png);   // assets/won.png
 LV_IMG_DECLARE( ui_img_dollar_png);   // assets/dollar.png
 LV_IMG_DECLARE( ui_img_battery_png);   // assets/battery.png
 LV_IMG_DECLARE( ui_img_53718616);   // assets/battery-full.png

@@ -1,3 +1,5 @@
+![gif](/deskpal.gif)
+
 매 30분마다 공기질 정보와 원-달러 환율을 업데이트합니다. 업데이트 주기는 [`COLLECTOR_SCAN_INTERVAL_MS`](https://github.com/libmcu/deskpal/blob/main/include/collector.h#L26)에서 변경할 수 있습니다.
 
 | Good   | Moderate | Unhealthy for Sensitive Groups | Unhealthy | Very Unhealthy | Hazardous |

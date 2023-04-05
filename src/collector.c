@@ -2,6 +2,7 @@
 
 #include <semaphore.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "pwifi/wifi.h"
 #include "http_client.h"
@@ -9,12 +10,12 @@
 
 #include "libmcu/logging.h"
 #include "libmcu/assert.h"
-#include "libmcu/timext.h"
 
 #define DEFAULT_SSID		""
 #define DEFAULT_PASS		""
 
-#define AQI_URL			"https://api.waqi.info/feed/seoul/?token="
+#define AQI_TOKEN		""
+#define AQI_URL			"https://api.waqi.info/feed/@4497/?token="AQI_TOKEN
 #define XCHG_URL		"https://quotation-api-cdn.dunamu.com/v1/forex/recent?codes=FRX.KRWUSD"
 
 #define REQUEST_TIMEOUT_MS	5000UL
@@ -153,9 +154,6 @@ static void request_get(const char *url, uint32_t timeout_ms,
 	http_client_request(client, on_http_response, 0);
 	http_client_destroy(client);
 
-	debug("Received %lu/%lu", buf.len, buf.cap);
-	debug("=> %.*s", buf.len, buf.space);
-
 	if (callback) {
 		(*callback)(&buf, ctx);
 	}
@@ -227,9 +225,6 @@ static void parse_json(const char *json, size_t json_len,
 		const char *value = &json[tokens[i+1].start];
 		int value_len = tokens[i+1].end - tokens[i+1].start;
 
-		debug("type %d size %d %d %.*s", tokens[i].type, tokens[i].size,
-				tokens[i].start, key_len, key);
-
 		if ((*proc)(key, key_len, value, value_len, ctx)) {
 			break;
 		}
@@ -245,7 +240,6 @@ static void on_aiq_response(const struct http_client_buffer *response, void *ctx
 		parse_json((const char *)response->space, response->len,
 				proc_aqi, ctx);
 	}
-	debug("AQI %u", air_quality->aqi);
 }
 
 static void on_xchg_response(const struct http_client_buffer *response, void *ctx)
@@ -257,7 +251,6 @@ static void on_xchg_response(const struct http_client_buffer *response, void *ct
 		parse_json((const char *)response->space, response->len,
 				proc_xchg, ctx);
 	}
-	debug("XCHG %lu", *xchg);
 }
 
 static uint16_t get_air_quality(struct air_quality *air_quality)
