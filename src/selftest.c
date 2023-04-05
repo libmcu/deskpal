@@ -14,47 +14,36 @@
 #include "libmcu/metrics.h"
 #include "libmcu/compiler.h"
 
-#include "bq25180.h"
-#include "bq25180_overrides.h"
 #include "battery.h"
 #include "pble/ble.h"
 #include "mxic_nor_qspi.h"
 #include "userbutton.h"
 #include "ledind.h"
 
-static bool test_bq25180(void)
+static void wait_for_voltage_settle_out(void)
 {
-	uint8_t val;
-	int rc;
-
-	debug("Test BQ25180(I2C)");
-
-	bq25180_reset(0);
-
-	if ((rc = bq25180_read(BQ25180_DEVICE_ADDRESS, 0xC/*MASK_ID*/,
-				&val, sizeof(val))) != 0 ||
-			val != 0xC0/*default reset value*/) {
-		error("%x %d", val, rc);
-		return false; 
-	}
-
-	return true;
+	sleep_ms(30);
 }
 
 static bool test_battery(void)
 {
 	debug("Test Battery Level(ADC)");
 
-	bq25180_enable_battery_charging(true);
+	battery_enable_charging();
+	wait_for_voltage_settle_out();
 
 	int mV_charging = battery_raw_to_millivolts(battery_level_raw());
 
-	bq25180_enable_battery_charging(false);
+	battery_disable_charging();
+	wait_for_voltage_settle_out();
 
-	int mV = battery_raw_to_millivolts(battery_level_raw());
+	int mV_disconnected = battery_raw_to_millivolts(battery_level_raw());
 
-	if (mV_charging < 4000 || mV > 1000) {
-		error("%dmV %dmV", mV_charging, mV);
+	battery_enable_charging();
+
+	if (mV_charging < (int)(BATTERY_MAX_MILLIVOLTS - 200/*margin*/) ||
+			mV_disconnected > (int)BATTERY_MIN_MILLIVOLTS) {
+		error("%dmV %dmV", mV_charging, mV_disconnected);
 		return false;
 	}
 
@@ -63,11 +52,19 @@ static bool test_battery(void)
 
 static bool is_battery_attached(void)
 {
-	if (battery_raw_to_millivolts(battery_level_raw()) < 2800) {
-		return false;
+	bool rc = true;
+
+	battery_disable_charging();
+	wait_for_voltage_settle_out();
+
+	if (battery_raw_to_millivolts(battery_level_raw()) <
+			(int)BATTERY_MIN_MILLIVOLTS) {
+		rc = false;
 	}
 
-	return true;
+	battery_enable_charging();
+
+	return rc;
 }
 
 #define QSPI_TEST_DATA_SIZE		256U
@@ -92,7 +89,7 @@ static bool test_qspi_flash(void)
 			offset += sizeof(buf)) {
 		rc |= mxic_read(qspi, QSPI_TEST_ADDR + offset, buf, sizeof(buf));
 		if (memcmp(&src[offset], buf, sizeof(buf)) != 0) {
-			error("not match");
+			error("not match(%d)", rc);
 			return false;
 		}
 	}
@@ -115,6 +112,7 @@ static bool test_ble(void)
 	ble_adv_init(ble, BLE_ADV_IND);
 	ble_adv_start(ble);
 	ble_adv_stop(ble);
+	ble_disable(ble);
 #endif
 	return true;
 }
@@ -182,8 +180,7 @@ selftest_error_t selftest(void)
 		goto out;
 	}
 
-	if (!test_bq25180() ||
-			!test_battery() ||
+	if (!test_battery() ||
 			!test_qspi_flash() ||
 			!test_ble() ||
 			!test_wifi()) {

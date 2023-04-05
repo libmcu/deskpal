@@ -12,6 +12,8 @@
 #include "nrf_drv_twi.h"
 #include "nrf_gpio.h"
 #include "bsp.h"
+#include "libmcu/metrics.h"
+#include "libmcu/timext.h"
 
 #define I2C0_SDA_PIN		45 /*P1.13*/
 #define I2C0_SCL_PIN		44 /*P1.12*/
@@ -39,6 +41,12 @@ static void on_event(nrf_drv_twi_evt_t const *p_event, void *p_context)
 
 static void prepare_xfer(void)
 {
+	uint32_t tout;
+	timeout_set(&tout, 10);
+	while (nrf_drv_twi_is_busy(&handle) && !timeout_is_expired(tout)) {
+		/* waiting to be available */
+	}
+
 	is_xfer_done = false;
 }
 
@@ -58,6 +66,7 @@ static int i2c0_read(struct i2c *self, uint8_t addr, uint8_t reg,
 
 	if (nrf_drv_twi_tx(&handle, addr, &reg, sizeof(reg), true)
 			!= NRF_SUCCESS) {
+		metrics_increase(I2CError);
 		return -EIO;
 	}
 
@@ -65,6 +74,7 @@ static int i2c0_read(struct i2c *self, uint8_t addr, uint8_t reg,
 	prepare_xfer();
 
 	if (nrf_drv_twi_rx(&handle, addr, buf, bufsize) != NRF_SUCCESS) {
+		metrics_increase(I2CError);
 		return -EIO;
 	}
 
@@ -86,6 +96,7 @@ static int i2c0_write(struct i2c *self, uint8_t addr, uint8_t reg,
 
 	if (nrf_drv_twi_tx(&handle, addr, buf, (uint8_t)(data_len+1), false)
 			!= NRF_SUCCESS) {
+		metrics_increase(I2CError);
 		return -EIO;
 	}
 
@@ -107,6 +118,7 @@ static int i2c0_init(struct i2c *self)
 	};
 
 	if (nrf_drv_twi_init(&handle, &cfg, on_event, NULL) != NRF_SUCCESS) {
+		metrics_increase(I2CError);
 		return -EIO;
 	}
 

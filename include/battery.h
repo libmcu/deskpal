@@ -14,6 +14,13 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
+#if !defined(BATTERY_MIN_MILLIVOLTS)
+#define BATTERY_MIN_MILLIVOLTS		3000U
+#endif
+#if !defined(BATTERY_MAX_MILLIVOLTS)
+#define BATTERY_MAX_MILLIVOLTS		4200U
+#endif
+
 typedef enum battery_status {
 	BATTERY_UNKNOWN,
 	BATTERY_DISCONNECTED,
@@ -73,6 +80,9 @@ int battery_raw_to_millivolts(int raw);
  * @return @ref battery_status
  */
 battery_status_t battery_status(void);
+
+void battery_enable_charging(void);
+void battery_disable_charging(void);
 
 #if defined(__cplusplus)
 }

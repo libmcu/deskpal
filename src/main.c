@@ -11,8 +11,9 @@
 #include "libmcu/metrics.h"
 #include "libmcu/cli.h"
 #include "libmcu/syscall.h"
+#include "libmcu/ao.h"
+#include "libmcu/ao_timer.h"
 
-#include "evtloop.h"
 #include "ledind.h"
 #include "userbutton.h"
 #include "battery.h"
@@ -20,14 +21,23 @@
 #include "gui.h"
 #include "collector.h"
 
-#define EVTLOOP_STACK_SIZE_BYTES	8192U
-#define EVTLOOP_PRIORITY		1U
+#define AO_STACK_SIZE_BYTES		8192U
+#define AO_PRIORITY			1U
 
 #define CLI_MAX_HISTORY			10U
 
 #define LED_BLINK_ON_TIME_MS		50U
 #define LED_BLINK_INTERVAL_MS		1500U
 #define LED_BLINK_ERROR_INTERVAL_MS	150U
+
+typedef void (*event_handler_t)(void *ctx);
+
+struct ao_event {
+	event_handler_t handler;
+	void *ctx;
+};
+
+static struct ao ao_handle;
 
 static void process_led(void *ctx);
 static void process_button(void *ctx);
@@ -37,41 +47,41 @@ static void process_collector(void *ctx);
 
 static struct deskpal deskpal;
 
-static evtloop_event_t led_event = {
+static struct ao_event led_event = {
 	.handler = process_led,
 };
 
-static evtloop_event_t button_event = {
+static struct ao_event button_event = {
 	.handler = process_button,
 };
 
-static evtloop_event_t battery_event = {
+static struct ao_event battery_event = {
 	.handler = process_battery,
 };
 
-static evtloop_event_t gui_event = {
+static struct ao_event gui_event = {
 	.handler = process_gui,
 };
 
-static evtloop_event_t collector_event = {
+static struct ao_event collector_event = {
 	.handler = process_collector,
 };
 
 static void on_userbutton_state_change(void)
 {
-	evtloop_post(&button_event);
+	ao_post(&ao_handle, &button_event);
 }
 
 static void on_battery_status_change(void)
 {
-	evtloop_post(&battery_event);
+	ao_post(&ao_handle, &battery_event);
 }
 
 static void process_button(void *ctx)
 {
 	unused(ctx);
 	if (userbutton_process()) {
-		evtloop_post(&button_event);
+		ao_post(&ao_handle, &button_event);
 	}
 }
 
@@ -81,7 +91,7 @@ static void process_battery(void *ctx)
 	enum battery_status status = battery_status();
 
 	if (status == BATTERY_UNKNOWN) {
-		evtloop_post_defer(&battery_event, 100);
+		ao_post_defer(&ao_handle, &battery_event, 100);
 	}
 
 	deskpal.battery_pct = battery_level_pct();
@@ -92,14 +102,23 @@ static void process_led(void *ctx)
 {
 	unused(ctx);
 	uint32_t msec = ledind_step();
-	evtloop_post_defer(&led_event, msec);
+	ao_post_defer(&ao_handle, &led_event, msec);
+}
+
+static void dispatch(struct ao * const ao, const struct ao_event * const event)
+{
+	(void)ao;
+
+	if (event && event->handler) {
+		(*event->handler)(event->ctx);
+	}
 }
 
 static void process_gui(void *ctx)
 {
 	unused(ctx);
 	gui_step(0);
-	evtloop_post_defer(&gui_event, GUI_UPDATE_INTERVAL_MS);
+	ao_post_defer(&ao_handle, &gui_event, GUI_UPDATE_INTERVAL_MS);
 }
 
 static void process_collector(void *ctx)
@@ -111,7 +130,7 @@ static void process_collector(void *ctx)
 		interval_ms = COLLECTOR_SCAN_INTERVAL_MS;
 	}
 
-	evtloop_post_defer(&collector_event, interval_ms);
+	ao_post_defer(&ao_handle, &collector_event, interval_ms);
 }
 
 static size_t logging_stdout_writer(const void *data, size_t size)
@@ -170,7 +189,7 @@ static void on_userbutton_event(enum button_event event,
 	unused(ctx);
 	switch (event) {
 	case BUTTON_EVT_CLICK:
-		evtloop_post(&collector_event);
+		ao_post(&ao_handle, &collector_event);
 		break;
 	default:
 		break;
@@ -185,7 +204,10 @@ int main(void)
 	logging_init(board_get_time_since_boot_ms);
 	logging_stdout_backend_init();
 
-	evtloop_init(EVTLOOP_PRIORITY, EVTLOOP_STACK_SIZE_BYTES);
+	ao_timer_init();
+	ao_create(&ao_handle, AO_STACK_SIZE_BYTES, AO_PRIORITY);
+	ao_start(&ao_handle, dispatch);
+
 	battery_init(battery_monitor_init(on_battery_status_change));
 	userbutton_init(userbutton_gpio_init(on_userbutton_state_change));
 	ledind_init(ledind_gpio_create());
@@ -197,9 +219,9 @@ int main(void)
 
 	userbutton_set_handler(on_userbutton_event, 0);
 	ledind_enable();
-	evtloop_post(&led_event);
-	evtloop_post(&gui_event);
-	evtloop_post(&collector_event);
+	ao_post(&ao_handle, &led_event);
+	ao_post(&ao_handle, &gui_event);
+	ao_post(&ao_handle, &collector_event);
 	run_selftest();
 
 	shell_start();
