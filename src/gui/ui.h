@@ -28,11 +28,14 @@ extern lv_obj_t *ui_gauge;
 extern lv_obj_t *ui_Bar2;
 
 
-LV_IMG_DECLARE( ui_img_perfect_png);   // assets/perfect.png
+LV_IMG_DECLARE( ui_img_stars_png);   // assets/good.png
 LV_IMG_DECLARE( ui_img_good_png);   // assets/good.png
-LV_IMG_DECLARE( ui_img_1610968716);   // assets/not-good.png
-LV_IMG_DECLARE( ui_img_bad_png);   // assets/bad.png
-LV_IMG_DECLARE( ui_img_mask_png);   // assets/mask.png
+LV_IMG_DECLARE( ui_img_notgood_png);   // assets/good.png
+LV_IMG_DECLARE( ui_img_bad_png);   // assets/good.png
+LV_IMG_DECLARE( ui_img_verybad_png);   // assets/good.png
+LV_IMG_DECLARE( ui_img_dead_png);   // assets/good.png
+LV_IMG_DECLARE( ui_img_nobattery_png);   // assets/good.png
+LV_IMG_DECLARE( ui_img_nowifi_png);   // assets/good.png
 LV_IMG_DECLARE( ui_img_won_png);   // assets/won.png
 LV_IMG_DECLARE( ui_img_dollar_png);   // assets/dollar.png
 LV_IMG_DECLARE( ui_img_battery_png);   // assets/battery.png
@@ -40,9 +43,6 @@ LV_IMG_DECLARE( ui_img_53718616);   // assets/battery-full.png
 
 
 LV_FONT_DECLARE( ui_font_Georgia30);
-LV_FONT_DECLARE( ui_font_Georgia42);
-LV_FONT_DECLARE( ui_font_Georgia60);
-LV_FONT_DECLARE( ui_font_montserrat8);
 
 
 void ui_init(void);

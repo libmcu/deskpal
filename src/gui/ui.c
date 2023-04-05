@@ -36,12 +36,12 @@ lv_obj_t *ui_Bar2;
 void ui_update_screen(int aqi, int exchange_rate, int battery_pct, const char *date)
 {
 	const lv_img_dsc_t *imgs[] = {
-		&ui_img_perfect_png,
+		&ui_img_stars_png,
 		&ui_img_good_png,
-		&ui_img_1610968716,
+		&ui_img_notgood_png,
 		&ui_img_bad_png,
-		&ui_img_mask_png,
-		&ui_img_mask_png,
+		&ui_img_verybad_png,
+		&ui_img_dead_png,
 	};
 	const int aqimg = (aqi-1) / 50;
 	char buf[8] = { 0, };
@@ -155,7 +155,7 @@ lv_obj_clear_flag( ui_gauge, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
 ui_Bar2 = lv_bar_create(ui_gauge);
 lv_bar_set_range(ui_Bar2, 0,130);
-lv_bar_set_value(ui_Bar2, battery_pct, LV_ANIM_OFF);
+lv_bar_set_value(ui_Bar2, battery_pct,LV_ANIM_OFF);
 lv_obj_set_width( ui_Bar2, 30);
 lv_obj_set_height( ui_Bar2, 16);
 lv_obj_set_align( ui_Bar2, LV_ALIGN_CENTER );
