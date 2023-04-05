@@ -21,6 +21,7 @@ struct air_quality {
 struct deskpal {
 	struct air_quality air_quality;
 	uint32_t won_dollar_exchange_rate;
+	uint8_t battery_pct;
 };
 
 #if defined(__cplusplus)

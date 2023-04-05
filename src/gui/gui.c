@@ -5,6 +5,8 @@
 #include "libmcu/board.h"
 #include "libmcu/logging.h"
 
+static bool first_drawing = true; /* the first flush is always clearing screen. */
+
 static void on_flush(lv_disp_drv_t *drv, const lv_area_t *area,
 		lv_color_t *color_map)
 {
@@ -13,8 +15,12 @@ static void on_flush(lv_disp_drv_t *drv, const lv_area_t *area,
 
 	info("%d %d %d %d %lu", area->x1, area->x2, area->y1, area->y2, len);
 
-	gui_flush(buf);
+	if (!first_drawing) {
+		gui_flush(buf);
+	}
+
 	lv_disp_flush_ready(drv);
+	first_drawing = false;
 }
 
 static void set_pixel(lv_disp_drv_t *disp_drv, uint8_t *buf, lv_coord_t buf_w,
@@ -69,7 +75,7 @@ void gui_step(const struct deskpal *deskpal)
 
 		ui_update_screen(deskpal->air_quality.aqi,
 				deskpal->won_dollar_exchange_rate,
-				100, timestr);
+				deskpal->battery_pct, timestr);
 		lv_disp_load_scr(ui_aq);
 	}
 
@@ -83,5 +89,5 @@ void gui_init(void)
 {
 	gui_hw_init();
 	initialize_lvgl();
-	ui_init();
+	//ui_init();
 }

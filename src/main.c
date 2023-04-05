@@ -35,6 +35,8 @@ static void process_battery(void *ctx);
 static void process_gui(void *ctx);
 static void process_collector(void *ctx);
 
+static struct deskpal deskpal;
+
 static evtloop_event_t led_event = {
 	.handler = process_led,
 };
@@ -81,7 +83,9 @@ static void process_battery(void *ctx)
 	if (status == BATTERY_UNKNOWN) {
 		evtloop_post_defer(&battery_event, 100);
 	}
-	debug("Battery status changed=%x | %d%%", status, battery_level_pct());
+
+	deskpal.battery_pct = battery_level_pct();
+	debug("Battery status changed=%x | %d%%", status, deskpal.battery_pct);
 }
 
 static void process_led(void *ctx)
@@ -100,7 +104,6 @@ static void process_gui(void *ctx)
 
 static void process_collector(void *ctx)
 {
-	struct deskpal deskpal = { 0, };
 	uint32_t interval_ms = COLLECTOR_RETRY_INTERVAL_MS;
 
 	if (collector_aggregate(&deskpal) == COLLECTOR_SUCCESS) {
