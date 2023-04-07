@@ -13,6 +13,19 @@
 - [ESP32S3 MADI board](https://libmcu.org/kr/madi)
 - [1.54" E-Ink display module](https://www.waveshare.com/1.54inch-e-paper-module.htm)
 
+### 핀 연결
+
+| EPD  | MADI     |
+| ---- | -------- |
+| BUSY | 6(IO2)   |
+| RST  | 8(IO38)  |
+| DC   | 7(IO37)  |
+| CS   | 14(IO10) |
+| CLK  | 16(IO12) |
+| DIN  | 15(IO11) |
+| GND  | 2(GND)   |
+| 3.3V | 1(3V3)   |
+
 ### 공기질 정보 토큰 입력
 AQI 정보는 [aqicn.org](https://aqicn.org/)에서 받아옵니다.
 따라서 [토큰 발행 페이지](https://aqicn.org/data-platform/token/)에서 먼저 토큰을 발급받아야 합니다.
