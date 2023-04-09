@@ -13,6 +13,7 @@
 #include "libmcu/syscall.h"
 #include "libmcu/ao.h"
 #include "libmcu/ao_timer.h"
+#include "libmcu/pm.h"
 
 #include "ledind.h"
 #include "userbutton.h"
@@ -95,7 +96,6 @@ static void process_battery(void *ctx)
 	}
 
 	deskpal.battery_pct = battery_level_pct();
-	debug("Battery status changed=%x | %d%%", status, deskpal.battery_pct);
 }
 
 static void process_led(void *ctx)
@@ -128,6 +128,7 @@ static void process_collector(void *ctx)
 	if (collector_aggregate(&deskpal) == COLLECTOR_SUCCESS) {
 		gui_step(&deskpal);
 		interval_ms = COLLECTOR_SCAN_INTERVAL_MS;
+		pm_enter(PM_SLEEP_DEEP);
 	}
 
 	ao_post_defer(&ao_handle, &collector_event, interval_ms);
@@ -196,6 +197,14 @@ static void on_userbutton_event(enum button_event event,
 	}
 }
 
+static void on_deep_sleep(void *ctx)
+{
+	gui_sleep();
+	battery_enable_monitor(false);
+	ledind_off();
+	ledind_disable();
+}
+
 int main(void)
 {
 	board_init(); /* should be called very first. */
@@ -217,6 +226,7 @@ int main(void)
 			board_get_serial_number_string(),
 			board_get_version_string());
 
+	pm_register_entry_callback(PM_SLEEP_DEEP, 0, on_deep_sleep, 0);
 	userbutton_set_handler(on_userbutton_event, 0);
 	ledind_enable();
 	ao_post(&ao_handle, &led_event);

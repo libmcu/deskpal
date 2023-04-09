@@ -182,6 +182,19 @@ void gui_flush(void *ctx)
 	full_update(ctx);
 }
 
+void gui_sleep(void)
+{
+#if 1
+	send_command(0x10);
+	send_data_byte(0x01);
+#else
+	gpio_set_level(PIN_DC, 0);
+	gpio_set_level(PIN_CS, 0);
+	gpio_set_level(PIN_RST, 0);
+#endif
+	sleep_ms(50);
+}
+
 void gui_hw_init(void)
 {
 	initialize_gpio();

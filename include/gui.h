@@ -19,6 +19,7 @@ void gui_hw_init(void);
 void gui_init(void);
 void gui_step(const struct deskpal *deskpal);
 void gui_flush(void *ctx);
+void gui_sleep(void);
 
 #if defined(__cplusplus)
 }
