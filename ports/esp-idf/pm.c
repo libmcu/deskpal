@@ -8,7 +8,7 @@
 #include "esp_system.h"
 #include "esp_sleep.h"
 
-int pm_board_enter(pm_mode_t mode)
+int pm_port_enter(pm_mode_t mode)
 {
 	esp_sleep_enable_ext0_wakeup(0, 0);
 	esp_sleep_enable_timer_wakeup(30*60*1000*1000); /* 30 mins */
