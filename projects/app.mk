@@ -32,6 +32,7 @@ INCS += $(LIBMCU_MODULES_INCS) \
 	$(PL4_INCS) \
 	$(PMQTT_INCS) \
 	$(BQ25180_INCS) \
+	$(BASEDIR)/external/jsmn \
 
 DEFS += METRICS_USER_DEFINES=\"$(BASEDIR)/include/metrics.def\" \
 	TARGET_PLATFORM=$(TARGET_PLATFORM) \

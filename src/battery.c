@@ -180,7 +180,7 @@ uint8_t battery_level_pct(void)
 {
 	int millivolts = sample_mean_to_millivolts(read_raw());
 
-	millivolts = MAX(millivolts, (int)BATTERY_MIN_MILLIVOLTS);
+	millivolts = MAX(millivolts, BATTERY_MIN_MILLIVOLTS);
 	return (uint8_t)
 		(((uint32_t)millivolts - BATTERY_MIN_MILLIVOLTS) * 100 /
 		(BATTERY_MAX_MILLIVOLTS - BATTERY_MIN_MILLIVOLTS));
@@ -273,6 +273,7 @@ int battery_init(const struct battery_monitor *battery_monitor)
 	bq25180_set_sys_voltage(BQ25180_SYS_REG_PASS_THROUGH);
 	bq25180_set_battery_regulation_voltage(BATTERY_MAX_MILLIVOLTS);
 	bq25180_set_precharge_threshold(BATTERY_MIN_MILLIVOLTS);
+	bq25180_set_fastcharge_current(110); /* 10% of 1100mAh */
 
 	enable_monitor(true);
 
