@@ -87,7 +87,7 @@ void gui_step(const struct deskpal *deskpal)
 
 void gui_init(void)
 {
-	gui_hw_init();
+	gui_port_init();
 	initialize_lvgl();
 	//ui_init();
 }

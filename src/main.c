@@ -184,8 +184,8 @@ static void run_selftest(void)
 			led_blink_interval - LED_BLINK_ON_TIME_MS);
 }
 
-static void on_userbutton_event(enum button_event event,
-		const struct button_data *info, void *ctx)
+static void on_userbutton_event(button_event_t event,
+		const struct button *info, void *ctx)
 {
 	unused(ctx);
 	switch (event) {

@@ -195,7 +195,7 @@ void gui_sleep(void)
 	sleep_ms(50);
 }
 
-void gui_hw_init(void)
+void gui_port_init(void)
 {
 	initialize_gpio();
 

@@ -123,9 +123,10 @@ static collector_err_t associate_with_ap(void *ctx)
 		.security = WIFI_SEC_TYPE_PSK,
 	};
 
-	wifi_connect(wifi_iface, &param);
-
-	set_status(NET_ASSOCIATING);
+	if (wifi_connect(wifi_iface, &param) == 0) {
+		set_status(NET_ASSOCIATING);
+		/* TODO: backoff */
+	}
 
 	return COLLECTOR_BUSY;
 }

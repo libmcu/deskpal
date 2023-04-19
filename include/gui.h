@@ -15,7 +15,7 @@ extern "C" {
 
 #define GUI_UPDATE_INTERVAL_MS		100
 
-void gui_hw_init(void);
+void gui_port_init(void);
 void gui_init(void);
 void gui_step(const struct deskpal *deskpal);
 void gui_flush(void *ctx);
